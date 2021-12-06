@@ -1,0 +1,42 @@
+.root {
+  display: flex;
+  flex-wrap: wrap;
+
+  div[class~='MuiInput-underline']:after {
+    border-color: #dbfdff !important;
+  }
+}
+
+.block {
+  margin-bottom: 30px;
+  width: 50%;
+
+  @media (max-width: 900px) {
+    width: 100%;
+  }
+}
+
+.text {
+  margin: 0;
+  color: white;
+  font-size: 14px;
+}
+
+.balance {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  width: 100%;
+
+  > *:first-child {
+    width: 100%;
+  }
+
+  > *:not(:first-child) {
+    width: 50%;
+
+    @media (max-width: 900px) {
+      width: 100%;
+    }
+  }
+}

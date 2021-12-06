@@ -3,12 +3,13 @@ import { Button, Input, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { useWeb3React } from "@web3-react/core";
 import { useState } from "react";
+import cl from 'classnames';
 import { ApprovalState, useApproveCallback } from "../../hooks/useApproveCallback";
 import { useSharePriceAContract, useSharePriceBContract, useSharePriceCContract, useSharePriceDContract, useSpreadAConract, useSpreadBConract, useSpreadCConract, useSpreadDConract } from "../../hooks/useContract";
 import useSpreadBalance from "../../hooks/useSpreadBalacne";
 import useSpreadBalance2 from "../../hooks/useSpreadBalacneTOK";
-import useSpreadTVL from "../../hooks/useSpreadTVL";
 import { useTransactions } from "../../store/transactions";
+import s from './Spread.module.scss';
 const initialInputs = {
     depositAmount: "",
     withdrawAmount: '',
@@ -24,7 +25,6 @@ export default function Spread ({ type }) {
     const sharePriceContract = useSharePriceContract()
     const spreadBalance = useSpreadBalance(contract, sharePriceContract);
     const spreadBalanceTOK = useSpreadBalance2(contract, sharePriceContract);
-    const spreadTVL = useSpreadTVL(sharePriceContract)
     const { account, library } = useWeb3React()
     const { AddTransaction } = useTransactions()
     const [approvalState, approveCallBack] = useApproveCallback(contract, 1, sharePriceContract?.address);
@@ -101,14 +101,12 @@ export default function Spread ({ type }) {
         }
     }
     return (
-        <Box >
-            <Box pb={2}>
-
+        <div className={s.root}>
+            <div className={s.block}>
                 <Typography color='common.white' fontWeight='bold' sx={{ textTransform: 'uppercase' }} >Deposit</Typography>
                 <Box display="flex" alignItems='center' flexWrap={{ xs: "wrap", xl: 'nowrap' }}>
-                    <Typography fontWeight='normal' fontSize="small" sx={{ whiteSpace: 'nowrap' }} >Deposit FTM:</Typography>
-
-                    <Input onChange={handleChange} name='depositAmount' value={inputValues.depositAmount} placeholder="Amount" type="number" sx={{ mx: 2 }} inputProps={{ min: 0, sx: { color: 'common.white', fontSize: 'small' } }} />
+                    <Typography color='common.white' fontWeight='normal' fontSize="small" sx={{ whiteSpace: 'nowrap' }} >Deposit FTM:</Typography>
+                    <Input  onChange={handleChange} name='depositAmount' value={inputValues.depositAmount} placeholder="Amount" type="number" sx={{ mx: 2 }} inputProps={{ min: 0, sx: { color: 'common.white', fontSize: 'small' } }} />
                     <Typography fontWeight='bold' fontSize="small" color="secondary.main" >FTM</Typography>
                 </Box>
                 {
@@ -121,11 +119,10 @@ export default function Spread ({ type }) {
                     </Typography>
 
                 </Button>
-            </Box>
+            </div>
 
-            <Box pb={2}>
-
-                <Typography color='common.white' fontWeight='bold' sx={{ textTransform: 'uppercase', mt: 4 }} >Withdraw</Typography>
+            <div className={s.block}>
+                <Typography color='common.white' fontWeight='bold' sx={{ textTransform: 'uppercase' }} >Withdraw</Typography>
                 <Box display="flex" alignItems='center' flexWrap={{ xs: "wrap" }}>
                     <Typography color='common.white' fontWeight='normal' fontSize="small" sx={{ whiteSpace: 'nowrap' }} >Withdraw SHARES: </Typography>
 
@@ -156,32 +153,30 @@ export default function Spread ({ type }) {
 
                         </Button>
                 }
-            </Box>
+            </div>
 
+            <div className={s.balance}>
+                <Typography color='common.white' fontWeight='bold' sx={{ textTransform: 'uppercase' }} >Bal</Typography>
+                <Box display="flex" alignItems='center'>
+                    <Typography color='common.white' fontWeight='normal' fontSize="small" sx={{ whiteSpace: 'nowrap' }} >Vault Balance: </Typography>
 
-            <Typography color='common.white' fontWeight='bold' sx={{ textTransform: 'uppercase', mt: 4 }} >Bal</Typography>
-            <Box display="flex" alignItems='center'>
-                <Typography color='common.white' fontWeight='normal' fontSize="small" sx={{ whiteSpace: 'nowrap' }} >Vault Balance: </Typography>
+                    <Typography fontWeight="400" color="common.white">&nbsp; {typeof spreadBalanceTOK === 'number' ? spreadBalanceTOK : '..'} &nbsp; </Typography>
 
-                <Typography fontWeight="400" color="common.white">&nbsp; {spreadBalanceTOK} &nbsp; </Typography>
+                    <Typography fontWeight='bold' fontSize="small" color="secondary.main" >SHARE TOKENS</Typography>
+                </Box>
+                <Box display="flex" alignItems='center'>
+                    <Typography color='common.white' fontWeight='normal' fontSize="small" sx={{ whiteSpace: 'nowrap' }} >Vault Balance: </Typography>
 
-                <Typography fontWeight='bold' fontSize="small" color="secondary.main" >SHARE TOKENS</Typography>
-            </Box>
-            <Box display="flex" alignItems='center'>
-                <Typography color='common.white' fontWeight='normal' fontSize="small" sx={{ whiteSpace: 'nowrap' }} >Vault Balance: </Typography>
+                    <Typography fontWeight="400" color="common.white">&nbsp; {spreadBalance || '..'} &nbsp; </Typography>
 
-                <Typography fontWeight="400" color="common.white">&nbsp; {spreadBalance} &nbsp; </Typography>
+                    <Typography fontWeight='bold' fontSize="small" color="secondary.main" >FTM</Typography>
+                </Box>
+            </div>
 
-                <Typography fontWeight='bold' fontSize="small" color="secondary.main" >FTM</Typography>
-            </Box>
-            <Typography color='common.white' fontWeight='bold' sx={{ textTransform: 'uppercase', mt: 4 }} >TVL</Typography>
-            <Box display="flex" alignItems='center'>
-                <Typography color='common.white' fontWeight='normal' fontSize="small" sx={{ whiteSpace: 'nowrap' }} >Vault TVL: </Typography>
-
-                <Typography fontWeight="400" color="common.white">&nbsp; {spreadTVL} &nbsp; </Typography>
-
-                <Typography fontWeight='bold' fontSize="small" color="secondary.main" >FTM</Typography>
-            </Box>
-        </Box>
+            <p className={s.text}>
+                Deposit the LPs into SpiritSwap farms. Autocompounds every hour, selling
+                spirit interest back into the above investment schema.
+            </p>
+        </div>
     )
 }
