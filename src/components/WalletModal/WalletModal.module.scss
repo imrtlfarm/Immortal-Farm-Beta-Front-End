@@ -1,41 +1,42 @@
 .connect {
-  display: flex;
-  position: relative;
-  align-items: center;
-  height: 90px;
+  height: min-content;
+  border-radius: 30px;
+  box-shadow: 0px 0px 15px transparent;
+  background-image: linear-gradient(to right bottom, #f0feff, #aaf8ff);
+  padding: 10px 30px;
   cursor: pointer;
-
-  &Img {
-    display: block;
-    width: 230px;
-  }
+  transition: 0.2s;
+  text-align: center;
 
   &Text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 100%;
-    transform: translate(-50%, -50%);
-    text-align: center;
     text-transform: uppercase;
-    color: white;
+    color: #848ae4;
     font-size: 18px;
     font-weight: bold;
   }
 
+  &:hover {
+    box-shadow: 0px 0px 15px #dcfdff;
+    transition: 0.2s;
+  }
+
   &Disabled {
     cursor: default;
+
+    &:hover {
+      box-shadow: 0px 0px 15px transparent;
+    }
   }
 }
 
 @media (max-width: 1280px) {
   .connect {
-    &Img {
-      width: 200px;
-    }
+    margin: 10px 0 40px;
+    box-shadow: 0px 0px 15px #dcfdff;
+    background-image: linear-gradient(to right bottom, #848ae4, #747acb);
 
     &Text {
-      font-size: 16px;
+      color: white;
     }
   }
 }

@@ -114,7 +114,6 @@ export function WalletConnectButton ({ className }) {
             className={cl(className, s.connect, {[s.connectDisabled]: account})} 
             onClick={() => !account && setWalletState(true)}
         >
-            <img src="/images/connectWallet.png" className={s.connectImg} alt="connect wallet" />
             {isWrongChainError(error) 
                 ? <span className={cl(s.connectText, 'textError')}>Wrong Chain</span> 
                 : <span className={s.connectText}>{account ? 'Connected' : 'Connect'}</span>}
