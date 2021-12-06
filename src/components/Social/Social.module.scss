@@ -1,0 +1,47 @@
+.socials {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 260px;
+}
+
+.social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 7px;
+  width: 46px;
+  height: 46px;
+  border-radius: 100%;
+  box-shadow: 0px 0px 5px transparent;
+  background-color: #dbf3ff;
+  cursor: pointer;
+  transition: 0.2s;
+
+  svg.socialIcon {
+    width: 23px;
+    height: 23px;
+  }
+
+  &:nth-child(1) &Icon {
+    color: #bea4ef;
+  }
+
+  &:nth-child(2) &Icon {
+    color: #b0a3f1;
+  }
+
+  &:nth-child(3) &Icon {
+    color: #a39df1;
+  }
+
+  &:nth-child(4) &Icon {
+    color: #848ae4;
+  }
+
+  &:hover {
+    box-shadow: 0px 0px 5px #fff;
+    background-color: #ddfdff;
+    transition: 0.2s;
+  }
+}

@@ -1,0 +1,66 @@
+@import './fonts.scss';
+
+body {
+  margin: 0;
+  background-image: linear-gradient(to right, #d7cafc, #a5cafb);
+  line-height: normal;
+  font-family: Jost, Arial, sans-serif;
+  font-size: 16px;
+
+  @media (max-width: 900px) {
+    font-size: 14px;
+  }
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+/* Firefox */
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.container {
+  margin: 0 auto;
+  width: 100%;
+  max-width: 1440px;
+  padding: 0 20px;
+}
+
+.arrow {
+  display: inline-block;
+  border: solid #fff;
+  border-width: 0 3px 3px 0;
+  padding: 3px;
+}
+
+.right {
+  transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+}
+
+.left {
+  transform: rotate(135deg);
+  -webkit-transform: rotate(135deg);
+}
+
+.up {
+  transform: rotate(-135deg);
+  -webkit-transform: rotate(-135deg);
+}
+
+.down {
+  transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+}
+
+.textError {
+  color: red!important;
+}

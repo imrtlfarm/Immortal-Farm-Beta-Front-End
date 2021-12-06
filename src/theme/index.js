@@ -43,22 +43,6 @@ const theme = responsiveFontSizes(
       contentWidth: 1236,
     },
     typography: {
-      h1: {
-        fontFamily: "'Exo', sans-serif",
-      },
-      h2: {
-        fontFamily: "'Exo', sans-serif",
-      },
-      h3: {
-        fontFamily: "'Exo', sans-serif",
-      },
-      h4: {
-        fontFamily: "'Exo', sans-serif",
-      },
-      h5: {
-        fontFamily: "'Exo', sans-serif",
-      },
-      fontFamily: "'Exo', sans-serif",
       button: {
         textTransform: 'none',
         fontWeight: 'medium',

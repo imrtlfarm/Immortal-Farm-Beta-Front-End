@@ -7,10 +7,12 @@ import {
 } from '@mui/material';
 import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core';
 import { WalletConnectConnector } from '@web3-react/walletconnect-connector';
+import cl from 'classnames';
 import { SUPPORTED_WALLETS } from '../../connectors';
 import usePrevious from '../../hooks/usePrevious';
 import React, { useEffect } from 'react';
 import { useStore } from '../../store';
+import s from './WalletModal.module.scss';
 
 export default function WalletModal () {
     const { isOpen, setWalletState } = useStore();
@@ -103,31 +105,19 @@ function isWrongChainError (error) {
     return error instanceof UnsupportedChainIdError;
 }
 
-export function WalletConnectButton ({ size = 'large' }) {
+export function WalletConnectButton ({ className }) {
     const { setWalletState } = useStore();
     const { account, error } = useWeb3React();
+
     return (
-        <Box sx={{ position: 'relative', cursor: 'pointer' }} onClick={() => !account && setWalletState(true)} >
-            <Box display='flex' alignItems='center' justifyContent="center" sx={{ position: 'absolute', inset: '0' }}>
-
-                {
-                    isWrongChainError(error) ?
-                        <Typography fontWeight='900' color="error" variant="h6" sx={{ textTransform: 'uppercase' }}>
-                            Wrong Chain
-                        </Typography>
-                        :
-                        <Typography fontWeight='900' color="common.white" variant="h5" sx={{ textTransform: 'uppercase' }}>
-
-                            {
-                                account ? 'Connected' : 'Connect'
-                            }
-                        </Typography>
-                }
-
-            </Box>
-            <img src="/images/connectWallet.png" style={{ cursor: 'pointer', flexGrow: 0 }} alt="connect wallet" />
-
-
-        </Box>
+        <div 
+            className={cl(className, s.connect, {[s.connectDisabled]: account})} 
+            onClick={() => !account && setWalletState(true)}
+        >
+            <img src="/images/connectWallet.png" className={s.connectImg} alt="connect wallet" />
+            {isWrongChainError(error) 
+                ? <span className={cl(s.connectText, 'textError')}>Wrong Chain</span> 
+                : <span className={s.connectText}>{account ? 'Connected' : 'Connect'}</span>}
+        </div> 
     );
 }
