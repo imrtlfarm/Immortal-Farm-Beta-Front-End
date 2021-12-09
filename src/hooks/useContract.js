@@ -2,15 +2,9 @@ import ABI from '../constants/abi.json';
 import SHARE_PRICE_ABI from '../constants/sharePrice.json';
 import APPROVAL_ABI from '../constants/approve.json';
 import {
-  SPREAD_A_CONTRACT_ADDRESS,
-  SPREAD_B_CONTRACT_ADDRESS,
-  SPREAD_C_CONTRACT_ADDRESS,
-  SPREAD_D_CONTRACT_ADDRESS,
-  SHARE_PRICE_A_CONTRACT_ADDRESS,
-  SHARE_PRICE_B_CONTRACT_ADDRESS,
-  SHARE_PRICE_C_CONTRACT_ADDRESS,
-  SHARE_PRICE_D_CONTRACT_ADDRESS,
   APPROVAL_CONTRACT_ADDRESS,
+  SPREAD_CONTRACT_ADDRESS,
+  SHARE_PRICE_CONTRACT_ADDRESS,
 } from '../constants/index';
 import { useWeb3React } from '@web3-react/core';
 import { Contract } from '@ethersproject/contracts';
@@ -24,7 +18,7 @@ export function isAddress(value) {
     return false;
   }
 }
-// / account is not optional
+// account is not optional
 export function getSigner(library, account) {
   return library.getSigner(account).connectUnchecked();
 }
@@ -61,30 +55,16 @@ function useContract(address, ABI, withSignerIfPossible = true) {
     }
   }, [address, ABI, library, withSignerIfPossible, account]);
 }
-export function useSpreadAConract() {
-  return useContract(SPREAD_A_CONTRACT_ADDRESS, ABI, true);
-}
-export function useSpreadBConract() {
-  return useContract(SPREAD_B_CONTRACT_ADDRESS, ABI, true);
-}
-export function useSpreadCConract() {
-  return useContract(SPREAD_C_CONTRACT_ADDRESS, ABI, true);
-}
-export function useSpreadDConract() {
-  return useContract(SPREAD_D_CONTRACT_ADDRESS, ABI, true);
-}
-export function useSharePriceAContract() {
-  return useContract(SHARE_PRICE_A_CONTRACT_ADDRESS, SHARE_PRICE_ABI, true);
-}
-export function useSharePriceBContract() {
-  return useContract(SHARE_PRICE_B_CONTRACT_ADDRESS, SHARE_PRICE_ABI, true);
-}
-export function useSharePriceCContract() {
-  return useContract(SHARE_PRICE_C_CONTRACT_ADDRESS, SHARE_PRICE_ABI, true);
-}
-export function useSharePriceDContract() {
-  return useContract(SHARE_PRICE_D_CONTRACT_ADDRESS, SHARE_PRICE_ABI, true);
-}
+
 export function useApprovalContract() {
-  return useContract(APPROVAL_CONTRACT_ADDRESS, APPROVAL_ABI, true);
+  return useContract(APPROVAL_CONTRACT_ADDRESS, APPROVAL_ABI);
 }
+
+// contractId = 'A' | 'B' | 'C' | 'D'
+export const useSpreadContract = (contractId) => {
+  return useContract(SPREAD_CONTRACT_ADDRESS[contractId], ABI);
+};
+
+export const useSharePriceContract = (contractId) => {
+  return useContract(SHARE_PRICE_CONTRACT_ADDRESS[contractId], SHARE_PRICE_ABI);
+};

@@ -4,29 +4,24 @@ import { Box } from "@mui/system";
 import { useWeb3React } from "@web3-react/core";
 import { useState } from "react";
 import { ApprovalState, useApproveCallback } from "../../hooks/useApproveCallback";
-import { useSharePriceAContract, useSharePriceBContract, useSharePriceCContract, useSharePriceDContract, useSpreadAConract, useSpreadBConract, useSpreadCConract, useSpreadDConract } from "../../hooks/useContract";
-import useSpreadBalance from "../../hooks/useSpreadBalacne";
-import useSpreadBalance2 from "../../hooks/useSpreadBalacneTOK";
+import { useVault } from '../../hooks/useVault';
 import { useTransactions } from "../../store/transactions";
 import s from './Spread.module.scss';
 const initialInputs = {
     depositAmount: "",
     withdrawAmount: '',
 }
-export default function Spread ({ type }) {
+export default function Spread ({ vaultId }) {
     const [inputValues, setInputValues] = useState(initialInputs);
     const [errors, setErrors] = useState({});
     const [depositing, setDepositing] = useState(false);
     const [withdrawing, setWithdrawing] = useState(false);
-    const useContract = type === "A" ? useSpreadAConract : type === "B" ? useSpreadBConract : type === "C" ? useSpreadCConract : useSpreadDConract;
-    const contract = useContract();
-    const useSharePriceContract = type === "A" ? useSharePriceAContract : type === "B" ? useSharePriceBContract : type === "C" ? useSharePriceCContract : useSharePriceDContract;
-    const sharePriceContract = useSharePriceContract()
-    const spreadBalance = useSpreadBalance(contract, sharePriceContract);
-    const spreadBalanceTOK = useSpreadBalance2(contract, sharePriceContract);
+
     const { account, library } = useWeb3React()
+    const { spreadContract, sharePriceContract, balance, TVL } = useVault(vaultId);
     const { AddTransaction } = useTransactions()
-    const [approvalState, approveCallBack] = useApproveCallback(contract, 1, sharePriceContract?.address);
+    const [approvalState, approveCallBack] = useApproveCallback(spreadContract, 1, sharePriceContract?.address);
+
     const handleChange = (e) => {
         let nvalues = { ...inputValues };
         const name = e.target.name;
@@ -72,6 +67,7 @@ export default function Spread ({ type }) {
                 })
         }
     }
+    
     const withdrawTokens = () => {
         const nerrors = { ...errors };
         if (!inputValues.withdrawAmount) {
@@ -99,6 +95,7 @@ export default function Spread ({ type }) {
                 })
         }
     }
+    
     return (
         <div className={s.root}>
             <div className={s.block}>
@@ -159,14 +156,14 @@ export default function Spread ({ type }) {
                 <Box display="flex" alignItems='center'>
                     <Typography color='common.white' fontWeight='normal' fontSize="small" sx={{ whiteSpace: 'nowrap' }} >Vault Balance: </Typography>
 
-                    <Typography fontWeight="400" color="common.white">&nbsp; {typeof spreadBalanceTOK === 'number' ? spreadBalanceTOK : '..'} &nbsp; </Typography>
+                    <Typography fontWeight="400" color="common.white">&nbsp; {typeof balance === 'number' ? balance : '..'} &nbsp; </Typography>
 
                     <Typography fontWeight='bold' fontSize="small" color="secondary.main" >SHARE TOKENS</Typography>
                 </Box>
                 <Box display="flex" alignItems='center'>
-                    <Typography color='common.white' fontWeight='normal' fontSize="small" sx={{ whiteSpace: 'nowrap' }} >Vault Balance: </Typography>
+                    <Typography color='common.white' fontWeight='normal' fontSize="small" sx={{ whiteSpace: 'nowrap' }} >Vault TVL: </Typography>
 
-                    <Typography fontWeight="400" color="common.white">&nbsp; {spreadBalance || '..'} &nbsp; </Typography>
+                    <Typography fontWeight="400" color="common.white">&nbsp; {TVL || '..'} &nbsp; </Typography>
 
                     <Typography fontWeight='bold' fontSize="small" color="secondary.main" >FTM</Typography>
                 </Box>

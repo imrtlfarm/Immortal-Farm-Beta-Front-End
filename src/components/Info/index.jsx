@@ -1,35 +1,23 @@
 import { useState } from 'react';
 import cl from 'classnames';
-import {
-  useSpreadABalance,
-  useSpreadBBalance,
-  useSpreadCBalance,
-  useSpreadDBalance,
-} from '../../hooks/useSpreadBalacne';
-import {
-  useSharePriceAContract,
-  useSharePriceBContract,
-  useSharePriceCContract,
-  useSharePriceDContract,
-} from '../../hooks/useContract';
-import useSpreadTVL from '../../hooks/useSpreadTVL';
+import { useVault } from '../../hooks/useVault';
 import { truncate } from '../../utils';
 import { vaultsConfig } from '../vaultsConfig';
 import s from './Info.module.scss';
 
 export default function Info({ className }) {
   const [isMobileOpen, setIsMobileOpen] = useState(true);
-  const balance = {};
-  balance.A = useSpreadABalance();
-  balance.B = useSpreadBBalance();
-  balance.C = useSpreadCBalance();
-  balance.D = useSpreadDBalance();
+  const vaults = {};
+  vaults.A = useVault('A');
+  vaults.B = useVault('B');
+  vaults.C = useVault('C');
+  vaults.D = useVault('D');
 
-  const tvlA = useSpreadTVL(useSharePriceAContract());
-  const tvlB = useSpreadTVL(useSharePriceBContract());
-  const tvlC = useSpreadTVL(useSharePriceCContract());
-  const tvlD = useSpreadTVL(useSharePriceDContract());
-  const totalTVL = truncate(tvlA + tvlB + tvlC + tvlD);
+  const sum = Object.values(vaults).reduce(
+    (prevSum, vaultData) => prevSum + Number(vaultData.totalTVL || 0),
+    0,
+  );
+  const totalTVL = typeof vaults.A.totalTVL === 'number' && truncate(sum);
 
   return (
     <div className={cl(className, s.info, { [s.mobileOpen]: isMobileOpen })}>
@@ -40,7 +28,7 @@ export default function Info({ className }) {
       {vaultsConfig.map(({ id, title }) => (
         <p className={s.balance} key={title}>
           <span className={s.subtitle}>{title}:</span>
-          <span className={s.value}>{balance[id] || '..'}</span>
+          <span className={s.value}>{vaults[id].TVL || '..'}</span>
           <span className={s.unit}>FTM</span>
         </p>
       ))}
