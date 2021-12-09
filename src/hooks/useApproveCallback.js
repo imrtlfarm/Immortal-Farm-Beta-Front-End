@@ -5,7 +5,7 @@ import { BigNumber } from 'ethers';
 import { useTransactions } from '../store/transactions';
 import { useWeb3React } from '@web3-react/core';
 import { useIsApproving } from './useIsApproving';
-import useSingleCallResult from './useBlockchainCall';
+import { useBlockchainCall } from './useBlockchainCall';
 export const ApprovalState = {
   UNKNOWN: 'UNKNOWN',
   NOT_APPROVED: 'NOT_APPROVED',
@@ -13,7 +13,7 @@ export const ApprovalState = {
   APPROVED: 'APPROVED',
 };
 function useTokenAllowance(contract, account, spender) {
-  const result = useSingleCallResult(contract, 'allowance', [account, spender]);
+  const result = useBlockchainCall(contract, 'allowance', [account, spender]);
   return useMemo(() => {
     return !result ? BigNumber.from('0') : result;
   }, [result]);

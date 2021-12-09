@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useStore } from '../store';
 
-export default function useSingleCallResult(contract, method, inputs) {
+export const useBlockchainCall = (contract, method, inputs) => {
     const { lastBlockNumber } = useStore();
     const [data, setData] = useState(null);
     useEffect(() => {

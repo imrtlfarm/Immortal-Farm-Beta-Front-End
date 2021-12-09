@@ -1,13 +1,12 @@
 import cl from 'classnames';
 import Spread from '../Spread';
-import * as contractHooks from '../../hooks/useContract';
-import useSpreadTVL from '../../hooks/useSpreadTVL';
+import { useVault } from '../../hooks/useVault';
 import s from './Vault.module.scss';
 
 export default function Vault(props) {
   const { id, text, title, isOpen, onOpen, onClose, className } = props;
-  const sharePriceContract = contractHooks[`useSharePrice${id}Contract`]();
-  const spreadTVL = useSpreadTVL(sharePriceContract);
+  const { totalTVL } = useVault(id);
+  console.log('render vault')
 
   return (
     <div
@@ -18,7 +17,7 @@ export default function Vault(props) {
         <h3 className={s.title}>{title}</h3>
         <div className={s.info}>
           <span className={s.infoParam}>TVL:</span>
-          <span className={s.infoValue}>{spreadTVL || '..'}</span>
+          <span className={s.infoValue}>{totalTVL || '..'}</span>
           <span className={s.infoUnit}>FTM</span>
         </div>
         {/* uncomment when APY is added */}
@@ -30,7 +29,7 @@ export default function Vault(props) {
       </div>
       <div className={s.text}>{text}</div>
       <div className={s.arrow} onClick={isOpen ? onClose : undefined} />
-      <div className={s.form}>{isOpen && <Spread type={id} />}</div>
+      <div className={s.form}><Spread vaultId={id} /></div>
     </div>
   );
 }
