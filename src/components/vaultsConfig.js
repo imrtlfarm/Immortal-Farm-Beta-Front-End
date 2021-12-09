@@ -12,7 +12,6 @@ export const vaultsConfig = [
           <li>TAROT-FTM LP</li>
           <li>SUSHI-FTM LP</li>
           <li>ICE-FTM LP</li>
-          <li>TOMB-FTM LP</li>
           <li>GRIM-FTM LP</li>
         </ul>
       </>
@@ -28,7 +27,6 @@ export const vaultsConfig = [
           <li>FUSDT-FTM LP</li>
           <li>USDC-FTM LP</li>
           <li>MIM-FTM LP</li>
-          <li>TOMB-FTM LP</li>
         </ul>
       </>
     ),
@@ -65,7 +63,6 @@ export const vaultsConfig = [
           <li>fUSDT-FTM</li>
           <li>USDC-FTM</li>
           <li>MIM-FTM</li>
-          <li>TOMB-FTM</li>
           <li>TAROT-FTM</li>
           <li>SUSHI-FTM</li>
           <li>ICE-FTM</li>
