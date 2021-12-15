@@ -1,12 +1,15 @@
 import cl from 'classnames';
+import { vaultsConfig } from '../../configs';
 import Spread from '../Spread';
 import { useVault } from '../../hooks/useVault';
+import { useAPY } from '../../hooks/useAPY';
 import s from './Vault.module.scss';
 
 export default function Vault(props) {
-  const { id, text, title, isOpen, onOpen, onClose, className } = props;
+  const { id, isOpen, onOpen, onClose, className } = props;
+  const { text, title, pools } = vaultsConfig.find((el) => el.id === id);
   const { totalTVL } = useVault(id);
-  console.log('render vault')
+  const APY = useAPY(id);
 
   return (
     <div
@@ -20,16 +23,24 @@ export default function Vault(props) {
           <span className={s.infoValue}>{totalTVL || '..'}</span>
           <span className={s.infoUnit}>FTM</span>
         </div>
-        {/* uncomment when APY is added */}
-        {/* <div className={s.info}>
+        <div className={s.info}>
             <span className={s.infoParam}>APY:</span>
-            <span className={s.infoValue}>...</span>
+            <span className={s.infoValue}>{APY || '...'}</span>
             <span className={s.infoUnit}>%</span>
-        </div>  */}
+        </div> 
       </div>
-      <div className={s.text}>{text}</div>
+      <div className={s.text}>
+        <p>{text}</p>
+        <ul>
+          {pools.map((name) => (
+            <li key={name}>{name}</li>
+          ))}
+        </ul>
+      </div>
       <div className={s.arrow} onClick={isOpen ? onClose : undefined} />
-      <div className={s.form}><Spread vaultId={id} /></div>
+      <div className={s.form}>
+        <Spread vaultId={id} />
+      </div>
     </div>
   );
 }
