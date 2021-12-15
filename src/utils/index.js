@@ -40,3 +40,11 @@ export function truncate(number, index = 4) {
 export const toWei = (amount) => {
   return ethers.utils.parseUnits(amount, '18');
 };
+
+const sumArrayValues = (values) => {
+  return values.reduce((p, c) => p + c, 0)
+}
+
+export const getWeightedAverage = (factorsArray, weightsArray) => {
+  return sumArrayValues(factorsArray.map((factor, index) => factor * weightsArray[index])) / sumArrayValues(weightsArray)
+}

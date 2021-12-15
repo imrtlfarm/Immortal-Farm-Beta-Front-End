@@ -3,7 +3,7 @@ import cl from 'classnames';
 import Vault from '../Vault';
 import Info from '../Info';
 import Social from '../Social';
-import { vaultsConfig } from '../vaultsConfig';
+import { vaultsConfig } from '../../configs';
 import s from './Main.module.scss';
 
 const About = ({ isMobile = false }) => (
@@ -31,13 +31,11 @@ export default function Main() {
         <Info className={s.info} />
       </div>
       <div className={s.vaults}>
-        {vaultsConfig.map(({ id, title, text }) => (
+        {vaultsConfig.map(({ id }) => (
           <Vault
             key={id}
             className={s.vault}
             id={id}
-            title={title}
-            text={text}
             isOpen={openVault === id}
             onOpen={() => setOpenVault(id)}
             onClose={() => setOpenVault(null)}

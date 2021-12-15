@@ -2,7 +2,7 @@ import { useState } from 'react';
 import cl from 'classnames';
 import { useVault } from '../../hooks/useVault';
 import { truncate } from '../../utils';
-import { vaultsConfig } from '../vaultsConfig';
+import { vaultsConfig } from '../../configs';
 import s from './Info.module.scss';
 
 export default function Info({ className }) {

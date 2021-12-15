@@ -1,10 +1,14 @@
 import ABI from '../constants/abi.json';
 import SHARE_PRICE_ABI from '../constants/sharePrice.json';
 import APPROVAL_ABI from '../constants/approve.json';
+import MASTER_CHEF_ABI from '../constants/spiritMasterChefABI.json';
+import POOL_ABI from '../constants/poolABI.json';
 import {
   APPROVAL_CONTRACT_ADDRESS,
   SPREAD_CONTRACT_ADDRESS,
   SHARE_PRICE_CONTRACT_ADDRESS,
+  MASTER_CHEF_ADDRESS,
+  SPIRIT_FTM_POOL_ADDRESS
 } from '../constants/index';
 import { useWeb3React } from '@web3-react/core';
 import { Contract } from '@ethersproject/contracts';
@@ -68,3 +72,11 @@ export const useSpreadContract = (contractId) => {
 export const useSharePriceContract = (contractId) => {
   return useContract(SHARE_PRICE_CONTRACT_ADDRESS[contractId], SHARE_PRICE_ABI);
 };
+
+export const useMasterChefContract = () => {
+  return useContract(MASTER_CHEF_ADDRESS, MASTER_CHEF_ABI);
+}
+
+export const useSpiritFTMPoolContract = () => {
+  return useContract(SPIRIT_FTM_POOL_ADDRESS, POOL_ABI);
+}
