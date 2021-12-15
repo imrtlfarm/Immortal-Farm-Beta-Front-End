@@ -40,7 +40,7 @@ export const useAPY = (vaultId) => {
     let fee = 0;
     try {
       const covalent = await axios.get(
-        `https://api.covalenthq.com/v1/250/xy=k/spiritswap/pools/address/${poolHash}/?key=${process.env.REACT_APP_COVALENT_KEY}`,
+        `https://api.covalenthq.com/v1/250/xy=k/spiritswap/pools/address/${poolHash}/?key=ckey_4e30f83f47a14c799789e95153b`,
       );
       const { total_liquidity_quote, fee_24h_quote } = covalent.data.data.items[0];
       fee = (fee_24h_quote / total_liquidity_quote) * 365 * 100 * (5 / 6);
