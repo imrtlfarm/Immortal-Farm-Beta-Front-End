@@ -6,6 +6,7 @@ import { useState } from "react";
 import { ApprovalState, useApproveCallback } from "../../hooks/useApproveCallback";
 import { useVault } from '../../hooks/useVault';
 import { useTransactions } from "../../store/transactions";
+import { usePopups } from '../../store/popups';
 import s from './Spread.module.scss';
 const initialInputs = {
     depositAmount: "",
@@ -21,6 +22,7 @@ export default function Spread ({ vaultId }) {
     const { spreadContract, sharePriceContract, balance, TVL } = useVault(vaultId);
     const { AddTransaction } = useTransactions()
     const [approvalState, approveCallBack] = useApproveCallback(spreadContract, 1, sharePriceContract?.address);
+    const { AddPopup } = usePopups();
 
     const handleChange = (e) => {
         let nvalues = { ...inputValues };
@@ -63,6 +65,7 @@ export default function Spread ({ vaultId }) {
             })
                 .catch(error => {
                     setDepositing(false)
+                    AddPopup({ type: 'error', text: error?.data?.message || 'An error has occurred' });
                     console.error(error)
                 })
         }
@@ -91,11 +94,16 @@ export default function Spread ({ vaultId }) {
                 })
                 .catch(error => {
                     setWithdrawing(false)
-                    console.error(error)
+                    let text = error?.data?.message || 'An error has occurred';
+                    if (text.includes('Wait for cooldown after depositing before you can withdraw')) {
+                        text = text + '. Withdraw still on CD';
+                    }
+                    AddPopup({ type: 'error', text });
+                    console.error(error);
                 })
         }
     }
-    
+
     return (
         <div className={s.root}>
             <div className={s.block}>
