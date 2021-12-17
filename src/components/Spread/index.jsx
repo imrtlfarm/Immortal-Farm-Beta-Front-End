@@ -76,7 +76,7 @@ export default function Spread({ data }) {
     const gasLimit = await getGasLimit('withdraw', [parseUnits(withdraw)]);
 
     sharePriceContract
-      .withdraw(parseUnits(withdraw, { gasLimit }))
+      .withdraw(parseUnits(withdraw), { gasLimit })
       .then(async (res) => {
         setWithdraw(undefined);
         AddTransaction(res.hash, `Withdraw ${withdraw} FTM`);
@@ -117,6 +117,7 @@ export default function Spread({ data }) {
               placeholder="Amount"
               required
               min={0}
+              step="any"
             />
             <div className={s.unit}>FTM</div>
           </div>
@@ -135,6 +136,7 @@ export default function Spread({ data }) {
               placeholder="Amount"
               required
               min={0}
+              step="any"
             />
             <div className={s.unit}>Shares</div>
           </div>
