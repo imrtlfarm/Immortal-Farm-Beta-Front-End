@@ -37,16 +37,11 @@ export const useAPY = (vaultId) => {
   );
 
   const getFee = useCallback(async (poolHash) => {
-    let fee = 0;
-    try {
-      const covalent = await axios.get(
-        `https://api.covalenthq.com/v1/250/xy=k/spiritswap/pools/address/${poolHash}/?key=ckey_4e30f83f47a14c799789e95153b`,
-      );
-      const { total_liquidity_quote, fee_24h_quote } = covalent.data.data.items[0];
-      fee = (fee_24h_quote / total_liquidity_quote) * 365 * 100 * (5 / 6);
-    } catch (err) {
-      console.error(err);
-    }
+    const covalent = await axios.get(
+      `https://api.covalenthq.com/v1/250/xy=k/spiritswap/pools/address/${poolHash}/?key=ckey_4e30f83f47a14c799789e95153b`,
+    );
+    const { total_liquidity_quote, fee_24h_quote } = covalent.data.data.items[0];
+    const fee = (fee_24h_quote / total_liquidity_quote) * 365 * 100 * (5 / 6);
     return fee;
   }, []);
 
@@ -97,13 +92,18 @@ export const useAPY = (vaultId) => {
         const SEC_IN_YEAR = 60 * 60 * 24 * 365; // 31 536 000
         const BLOCKS_PER_YEAR = SEC_IN_YEAR / 0.9;
         const APR = percentageInterestRatePerBlock.multipliedBy(BLOCKS_PER_YEAR);
-        const fee = await getFee(poolHash);
 
-        return { APR, weight: underlyingFTM, fee };
+        try {
+          const fee = await getFee(poolHash)
+          return { APR, weight: underlyingFTM, fee };
+        } catch {
+          return undefined;
+        }
       }),
     );
     // FINISH CALCULATION FOR EACH POOL IN VAULT
 
+    if (poolsData.some(el => el === undefined)) return
     const APRs = poolsData.map((el) => el.APR.decimalPlaces(5).toNumber() + el.fee);
     const weights = poolsData.map((el) => el.weight.decimalPlaces(5).toNumber());
     const weightedAPR = getWeightedAverage(APRs, weights).toFixed(5);
