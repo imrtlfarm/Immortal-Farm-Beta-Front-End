@@ -28,6 +28,17 @@ export default function Spread({ data }) {
     AddPopup({ type: 'error', text });
   };
 
+  const getGasLimit = async (method, params) => {
+    try {
+      const estimatedGas = await sharePriceContract.estimateGas[method](...params);
+      const gasLimit = estimatedGas.mul(110).div(100);
+      return gasLimit;
+    } catch (err) {
+      console.log('gasLimitError', err);
+      return undefined;
+    }
+  };
+
   const depositTokens = (ev) => {
     ev.preventDefault();
     if (Number(deposit) === 0) {
@@ -54,17 +65,18 @@ export default function Spread({ data }) {
       .finally(() => setDepositing(false));
   };
 
-  const withdrawTokens = (ev) => {
+  const withdrawTokens = async (ev) => {
     ev.preventDefault();
     if (Number(withdraw) === 0) {
       AddPopup({ type: 'error', text: 'Amount cannot be equal to 0' });
       return;
     }
     if (!sharePriceContract) return;
-
     setWithdrawing(true);
+    const gasLimit = await getGasLimit('withdraw', [parseUnits(withdraw)]);
+
     sharePriceContract
-      .withdraw(parseUnits(withdraw))
+      .withdraw(parseUnits(withdraw, { gasLimit }))
       .then(async (res) => {
         setWithdraw(undefined);
         AddTransaction(res.hash, `Withdraw ${withdraw} FTM`);
@@ -73,12 +85,13 @@ export default function Spread({ data }) {
       .finally(() => setWithdrawing(false));
   };
 
-  const withdrawAll = () => {
+  const withdrawAll = async () => {
     if (!sharePriceContract) return;
-
     setWithdrawing(true);
+    const gasLimit = await getGasLimit('withdraw', [unformattedBalance]);
+
     sharePriceContract
-      .withdraw(unformattedBalance)
+      .withdraw(unformattedBalance, { gasLimit })
       .then(async (res) => {
         AddTransaction(res.hash, `Withdraw ${withdraw} FTM`);
       })
