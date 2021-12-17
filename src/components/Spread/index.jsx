@@ -1,186 +1,161 @@
-import { parseUnits } from "@ethersproject/units";
-import { Button, Input, Typography } from "@mui/material";
-import { Box } from "@mui/system";
-import { useWeb3React } from "@web3-react/core";
-import { useState } from "react";
-import { ApprovalState, useApproveCallback } from "../../hooks/useApproveCallback";
-import { useVault } from '../../hooks/useVault';
-import { useTransactions } from "../../store/transactions";
+import { parseUnits } from '@ethersproject/units';
+import { useWeb3React } from '@web3-react/core';
+import { useState } from 'react';
+import cl from 'classnames';
+import { ApprovalState, useApproveCallback } from '../../hooks/useApproveCallback';
+import { useTransactions } from '../../store/transactions';
 import { usePopups } from '../../store/popups';
 import s from './Spread.module.scss';
-const initialInputs = {
-    depositAmount: "",
-    withdrawAmount: '',
-}
-export default function Spread ({ vaultId }) {
-    const [inputValues, setInputValues] = useState(initialInputs);
-    const [errors, setErrors] = useState({});
-    const [depositing, setDepositing] = useState(false);
-    const [withdrawing, setWithdrawing] = useState(false);
 
-    const { account, library } = useWeb3React()
-    const { spreadContract, sharePriceContract, balance, TVL } = useVault(vaultId);
-    const { AddTransaction } = useTransactions()
-    const [approvalState, approveCallBack] = useApproveCallback(spreadContract, 1, sharePriceContract?.address);
-    const { AddPopup } = usePopups();
+export default function Spread({ data }) {
+  const [depositing, setDepositing] = useState(false);
+  const [withdrawing, setWithdrawing] = useState(false);
+  const [deposit, setDeposit] = useState('');
+  const [withdraw, setWithdraw] = useState('');
 
-    const handleChange = (e) => {
-        let nvalues = { ...inputValues };
-        const name = e.target.name;
-        const value = e.target.value
-        if ((e.target.type === "number" && value >= 0) || e.target.type !== 'number') {
-            nvalues[name] = value
-        }
+  const { spreadContract, sharePriceContract, balance, unformattedBalance, TVL } = data;
+  const { account, library } = useWeb3React();
+  const { AddTransaction } = useTransactions();
+  const [approvalState, approveCallBack] = useApproveCallback(spreadContract, 1, sharePriceContract?.address);
+  const { AddPopup } = usePopups();
 
-
-        setInputValues(nvalues)
+  const handleError = (error) => {
+    let text = error?.data?.message;
+    if (!text || text.includes('User denied transaction signature')) return;
+    if (text.includes('Wait for cooldown after depositing before you can withdraw')) {
+      text = text + '. Withdraw still on CD';
     }
+    AddPopup({ type: 'error', text });
+  };
 
-    const depositTokens = () => {
-        const nerrors = { ...errors };
-        if (!inputValues.depositAmount) {
-            nerrors.depositAmount = "Amount is required";
-        }
-        else if (inputValues.depositAmount <= 0) {
-
-            nerrors.depositAmount = "Enter a valid amount";
-        }
-        else {
-            nerrors.depositAmount = null;
-        }
-        setErrors(nerrors);
-        if (!nerrors.depositAmount && sharePriceContract) {
-            setDepositing(true)
-            const signer = library.getSigner(account)
-            const params = {
-                from: account,
-                to: sharePriceContract.address,
-                value: parseUnits(inputValues.depositAmount)
-            };
-
-            signer.sendTransaction(params).then(async (res) => {
-                setInputValues({ ...inputValues, depositAmount: '' });
-                setDepositing(false);
-                AddTransaction(res.hash, `Deposited ${inputValues.depositAmount} FTM`);
-            })
-                .catch(error => {
-                    setDepositing(false)
-                    AddPopup({ type: 'error', text: error?.data?.message || 'An error has occurred' });
-                    console.error(error)
-                })
-        }
+  const depositTokens = (ev) => {
+    ev.preventDefault();
+    if (Number(deposit) === 0) {
+      AddPopup({ type: 'error', text: 'Amount cannot be equal to 0' });
+      return;
     }
-    
-    const withdrawTokens = () => {
-        const nerrors = { ...errors };
-        if (!inputValues.withdrawAmount) {
-            nerrors.withdrawAmount = "Amount is required";
-        }
-        else if (inputValues.withdrawAmount <= 0) {
+    if (!sharePriceContract) return;
 
-            nerrors.withdrawAmount = "Enter a valid amount";
-        }
-        else {
-            nerrors.withdrawAmount = null;
-        }
-        setErrors(nerrors);
-        if (!nerrors.withdrawAmount && sharePriceContract) {
-            setWithdrawing(true)
-            sharePriceContract.withdraw(parseUnits(inputValues.withdrawAmount))
-                .then(async (res) => {
-                    setInputValues({ ...inputValues, withdrawAmount: '' });
-                    setWithdrawing(false);
-                    AddTransaction(res.hash, `Withdraw ${inputValues.withdrawAmount} FTM`);
-                })
-                .catch(error => {
-                    setWithdrawing(false)
-                    let text = error?.data?.message || 'An error has occurred';
-                    if (text.includes('Wait for cooldown after depositing before you can withdraw')) {
-                        text = text + '. Withdraw still on CD';
-                    }
-                    AddPopup({ type: 'error', text });
-                    console.error(error);
-                })
-        }
+    setDepositing(true);
+    const signer = library.getSigner(account);
+    const params = {
+      from: account,
+      to: sharePriceContract.address,
+      value: parseUnits(deposit),
+    };
+
+    signer
+      .sendTransaction(params)
+      .then(async (res) => {
+        setDeposit(undefined);
+        AddTransaction(res.hash, `Deposited ${deposit} FTM`);
+      })
+      .catch(handleError)
+      .finally(() => setDepositing(false));
+  };
+
+  const withdrawTokens = (ev) => {
+    ev.preventDefault();
+    if (Number(withdraw) === 0) {
+      AddPopup({ type: 'error', text: 'Amount cannot be equal to 0' });
+      return;
     }
+    if (!sharePriceContract) return;
 
-    return (
-        <div className={s.root}>
-            <div className={s.block}>
-                <Typography color='common.white' fontWeight='bold' sx={{ textTransform: 'uppercase' }} >Deposit</Typography>
-                <Box display="flex" alignItems='center' flexWrap={{ xs: "wrap", xl: 'nowrap' }}>
-                    <Typography color='common.white' fontWeight='normal' fontSize="small" sx={{ whiteSpace: 'nowrap' }} >Deposit FTM:</Typography>
-                    <Input  onChange={handleChange} name='depositAmount' value={inputValues.depositAmount} placeholder="Amount" type="number" sx={{ mx: 2 }} inputProps={{ min: 0, sx: { color: 'common.white', fontSize: 'small' } }} />
-                    <Typography fontWeight='bold' fontSize="small" color="secondary.main" >FTM</Typography>
-                </Box>
-                {
-                    errors.depositAmount &&
-                    <Typography sx={{ fontSize: '.7rem' }} color="error">{errors.depositAmount}</Typography>
-                }
-                <Button variant="contained" sx={{ mt: 2 }} disabled={depositing} onClick={depositTokens}>
-                    <Typography fontWeight="bold">
-                        Deposit
-                    </Typography>
+    setWithdrawing(true);
+    sharePriceContract
+      .withdraw(parseUnits(withdraw))
+      .then(async (res) => {
+        setWithdraw(undefined);
+        AddTransaction(res.hash, `Withdraw ${withdraw} FTM`);
+      })
+      .catch(handleError)
+      .finally(() => setWithdrawing(false));
+  };
 
-                </Button>
-            </div>
+  const withdrawAll = () => {
+    if (!sharePriceContract) return;
 
-            <div className={s.block}>
-                <Typography color='common.white' fontWeight='bold' sx={{ textTransform: 'uppercase' }} >Withdraw</Typography>
-                <Box display="flex" alignItems='center' flexWrap={{ xs: "wrap" }}>
-                    <Typography color='common.white' fontWeight='normal' fontSize="small" sx={{ whiteSpace: 'nowrap' }} >Withdraw SHARES: </Typography>
+    setWithdrawing(true);
+    sharePriceContract
+      .withdraw(unformattedBalance)
+      .then(async (res) => {
+        AddTransaction(res.hash, `Withdraw ${withdraw} FTM`);
+      })
+      .catch(handleError)
+      .finally(() => setWithdrawing(false));
+  };
 
-                    {<Input onChange={handleChange} name='withdrawAmount' value={inputValues.withdrawAmount} placeholder="Amount" type="number" sx={{ mx: 2 }} inputProps={{ min: 0, sx: { color: 'common.white', fontSize: 'small' } }} />}
-                    {<Typography fontWeight='bold' fontSize="small" color="secondary.main" >SHARES</Typography>}
-
-                </Box>
-                {
-                    errors.withdrawAmount &&
-                    <Typography sx={{ fontSize: '.7rem' }} color="error">{errors.withdrawAmount}</Typography>
-                }
-                {
-                    approvalState === ApprovalState.APPROVED ?
-
-                        <Button variant="contained" sx={{ mt: 2 }} disabled={withdrawing} onClick={withdrawTokens}>
-                            <Typography fontWeight="bold">
-                                Withdraw
-                            </Typography>
-
-                        </Button> :
-                        <Button variant="contained" sx={{ mt: 2 }} disabled={approvalState === ApprovalState.PENDING} onClick={approveCallBack}>
-                            <Typography fontWeight="bold">
-                                {
-                                    approvalState === ApprovalState.PENDING ? "Approving..." : 'Approve'
-                                }
-
-                            </Typography>
-
-                        </Button>
-                }
-            </div>
-
-            <div className={s.balance}>
-                <Typography color='common.white' fontWeight='bold' sx={{ textTransform: 'uppercase' }} >Bal</Typography>
-                <Box display="flex" alignItems='center'>
-                    <Typography color='common.white' fontWeight='normal' fontSize="small" sx={{ whiteSpace: 'nowrap' }} >Vault Balance: </Typography>
-
-                    <Typography fontWeight="400" color="common.white">&nbsp; {typeof balance === 'number' ? balance : '..'} &nbsp; </Typography>
-
-                    <Typography fontWeight='bold' fontSize="small" color="secondary.main" >SHARE TOKENS</Typography>
-                </Box>
-                <Box display="flex" alignItems='center'>
-                    <Typography color='common.white' fontWeight='normal' fontSize="small" sx={{ whiteSpace: 'nowrap' }} >Vault TVL: </Typography>
-
-                    <Typography fontWeight="400" color="common.white">&nbsp; {TVL || '..'} &nbsp; </Typography>
-
-                    <Typography fontWeight='bold' fontSize="small" color="secondary.main" >FTM</Typography>
-                </Box>
-            </div>
-
-            <p className={s.text}>
-                Deposit the LPs into SpiritSwap farms. Autocompounds every hour, selling
-                spirit interest back into the above investment schema.
-            </p>
+  return (
+    <>
+      <div className={s.root}>
+        <p className={s.text}>
+          Deposit the LPs into SpiritSwap farms. Autocompounds every hour, selling spirit interest back into the above
+          investment schema.
+        </p>
+        <form className={s.form} onSubmit={depositTokens}>
+          <div className={s.capture}>Deposit</div>
+          <div className={s.formField}>
+            <input
+              className={s.input}
+              value={deposit}
+              onChange={(ev) => setDeposit(ev.target.value)}
+              type="number"
+              placeholder="Amount"
+              required
+              min={0}
+            />
+            <div className={s.unit}>FTM</div>
+          </div>
+          <button className={s.button} disabled={depositing} type="submit">
+            Deposit
+          </button>
+        </form>
+        <form className={s.form} onSubmit={withdrawTokens}>
+          <div className={s.capture}>Withdraw</div>
+          <div className={s.formField}>
+            <input
+              className={s.input}
+              value={withdraw}
+              onChange={(ev) => setWithdraw(ev.target.value)}
+              type="number"
+              placeholder="Amount"
+              required
+              min={0}
+            />
+            <div className={s.unit}>Shares</div>
+          </div>
+          <div className={s.buttons}>
+            {approvalState === ApprovalState.APPROVED ? (
+              <button className={s.button} disabled={withdrawing} type="submit">
+                Approve
+              </button>
+            ) : (
+              <button
+                className={s.button}
+                disabled={approvalState === ApprovalState.PENDING}
+                onClick={approveCallBack}
+                type="button"
+              >
+                {approvalState === ApprovalState.PENDING ? 'Approving...' : 'Approve'}
+              </button>
+            )}
+            <button className={s.button} disabled={withdrawing} onClick={withdrawAll} type="button">
+              Withdraw all
+            </button>
+          </div>
+        </form>
+        <div className={cl(s.balance)}>
+          <div className={s.capture}>Vault TVL:</div>
+          <div className={s.value}>{TVL || '..'}</div>
+          <div className={s.unit}>FTM</div>
         </div>
-    )
+        <div className={cl(s.balance)}>
+          <div className={s.capture}>Vault balance:</div>
+          <div className={s.value}>{typeof balance === 'number' ? balance : '..'}</div>
+          <div className={s.unit}>Share tokens</div>
+        </div>
+      </div>
+    </>
+  );
 }

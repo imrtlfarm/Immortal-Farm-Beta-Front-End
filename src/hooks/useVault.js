@@ -25,6 +25,7 @@ export const useVault = (vaultId) => {
       spreadContract,
       sharePriceContract,
       balance: balance && truncate(formatEther(balance).toString()),
+      unformattedBalance: balance,
       TVL:
         balance &&
         sharePrice &&

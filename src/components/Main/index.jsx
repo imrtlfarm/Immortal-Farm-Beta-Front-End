@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import cl from 'classnames';
+import { useVault } from '../../hooks/useVault';
 import Vault from '../Vault';
 import Info from '../Info';
 import Social from '../Social';
@@ -23,12 +24,17 @@ const About = ({ isMobile = false }) => (
 
 export default function Main() {
   const [openVault, setOpenVault] = useState(null);
+  const vaultsData = {};
+  vaultsData.A = useVault('A');
+  vaultsData.B = useVault('B');
+  vaultsData.C = useVault('C');
+  vaultsData.D = useVault('D');
 
   return (
     <main className={cl(s.main, 'container')}>
       <div className={s.sidebar}>
         <About />
-        <Info className={s.info} />
+        <Info className={s.info} vaultsData={vaultsData} />
       </div>
       <div className={s.vaults}>
         {vaultsConfig.map(({ id }) => (
@@ -36,6 +42,7 @@ export default function Main() {
             key={id}
             className={s.vault}
             id={id}
+            data={vaultsData[id]}
             isOpen={openVault === id}
             onOpen={() => setOpenVault(id)}
             onClose={() => setOpenVault(null)}
