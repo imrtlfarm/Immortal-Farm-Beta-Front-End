@@ -19,15 +19,17 @@ export const Popups = () => {
             >
                 <Alert
                     onClose={() => RemovePopup(popup.id)}
-                    severity="success">
+                    severity={popup.type || "info"}>
                     <p style={{ margin: 0 }}>
                         {
-                            popup.summery
+                            popup.text
                         }
                     </p>
-                    <Link href={popup.link} target="_blank">
-                        View on FTMscan
-                    </Link>
+                    {popup.hasLink &&
+                        <Link href={popup.link} target="_blank">
+                            View on FTMscan
+                        </Link>
+                    }
                 </Alert>
             </Snackbar>
         })

@@ -142,7 +142,7 @@ export function TransactionsProvider({ children }) {
                   transactionIndex: receipt.transactionIndex,
                 },
               });
-              AddPopup(state[hash]?.summery, hash);
+              AddPopup({ type: 'success', text: state[hash]?.summery, link: hash });
             } else {
               checkedTransaction({
                 chainId,

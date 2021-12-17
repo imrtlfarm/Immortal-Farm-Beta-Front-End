@@ -4,11 +4,11 @@ import { getScanLink } from '../utils';
 const context = createContext();
 export function PopupsProvider({ children }) {
   const [state, setState] = useState([]);
-  function AddPopup(summery, trx) {
+  function AddPopup({ text, link, type }) {
     const id = new Date().getTime();
     setState([
       ...state,
-      { id, summery, link: getScanLink(trx, 'transaction') },
+      { id, text, hasLink: !!link, link: getScanLink(link, 'transaction'), type },
     ]);
   }
   function RemovePopup(id) {
