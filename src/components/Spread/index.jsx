@@ -7,11 +7,13 @@ import { useTransactions } from '../../store/transactions';
 import { usePopups } from '../../store/popups';
 import s from './Spread.module.scss';
 
+const GAS_LIMIT_ADD_PERCENT = 4;
+
 export default function Spread({ data }) {
   const [depositing, setDepositing] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
-  const [deposit, setDeposit] = useState('');
-  const [withdraw, setWithdraw] = useState('');
+  const [depositAmount, setDepositAmount] = useState('');
+  const [withdrawAmount, setWithdrawAmount] = useState('');
 
   const { spreadContract, sharePriceContract, balance, unformattedBalance, TVL } = data;
   const { account, library } = useWeb3React();
@@ -28,20 +30,9 @@ export default function Spread({ data }) {
     AddPopup({ type: 'error', text });
   };
 
-  const getGasLimit = async (method, params) => {
-    try {
-      const estimatedGas = await sharePriceContract.estimateGas[method](...params);
-      const gasLimit = estimatedGas.mul(110).div(100);
-      return gasLimit;
-    } catch (err) {
-      console.log('gasLimitError', err);
-      return undefined;
-    }
-  };
-
-  const depositTokens = (ev) => {
+  const depositTokens = async (ev) => {
     ev.preventDefault();
-    if (Number(deposit) === 0) {
+    if (Number(depositAmount) === 0) {
       AddPopup({ type: 'error', text: 'Amount cannot be equal to 0' });
       return;
     }
@@ -52,14 +43,21 @@ export default function Spread({ data }) {
     const params = {
       from: account,
       to: sharePriceContract.address,
-      value: parseUnits(deposit),
+      value: parseUnits(depositAmount),
     };
+
+    try {
+      const estimatedGas = await signer.estimateGas(params);
+      params.gasLimit = estimatedGas.mul(100 + GAS_LIMIT_ADD_PERCENT).div(100);
+    } catch (err) {
+      console.log('gasLimitError', err);
+    }
 
     signer
       .sendTransaction(params)
       .then(async (res) => {
-        setDeposit(undefined);
-        AddTransaction(res.hash, `Deposited ${deposit} FTM`);
+        setDepositAmount(undefined);
+        AddTransaction(res.hash, `Deposited ${depositAmount} FTM`);
       })
       .catch(handleError)
       .finally(() => setDepositing(false));
@@ -67,19 +65,26 @@ export default function Spread({ data }) {
 
   const withdrawTokens = async (ev) => {
     ev.preventDefault();
-    if (Number(withdraw) === 0) {
+    if (Number(withdrawAmount) === 0) {
       AddPopup({ type: 'error', text: 'Amount cannot be equal to 0' });
       return;
     }
     if (!sharePriceContract) return;
     setWithdrawing(true);
-    const gasLimit = await getGasLimit('withdraw', [parseUnits(withdraw)]);
+    const params = {};
+
+    try {
+      const estimatedGas = await sharePriceContract.estimateGas.withdraw(parseUnits(withdrawAmount));
+      params.gasLimit = estimatedGas.mul(100 + GAS_LIMIT_ADD_PERCENT).div(100);
+    } catch (err) {
+      console.log('gasLimitError', err);
+    }
 
     sharePriceContract
-      .withdraw(parseUnits(withdraw), { gasLimit })
+      .withdraw(parseUnits(withdrawAmount), params)
       .then(async (res) => {
-        setWithdraw(undefined);
-        AddTransaction(res.hash, `Withdraw ${withdraw} FTM`);
+        setWithdrawAmount(undefined);
+        AddTransaction(res.hash, `Withdraw ${withdrawAmount} FTM`);
       })
       .catch(handleError)
       .finally(() => setWithdrawing(false));
@@ -88,12 +93,19 @@ export default function Spread({ data }) {
   const withdrawAll = async () => {
     if (!sharePriceContract) return;
     setWithdrawing(true);
-    const gasLimit = await getGasLimit('withdraw', [unformattedBalance]);
+    const params = {};
+
+    try {
+      const estimatedGas = await sharePriceContract.estimateGas.withdraw(unformattedBalance);
+      params.gasLimit = estimatedGas.mul(100 + GAS_LIMIT_ADD_PERCENT).div(100);
+    } catch (err) {
+      console.log('gasLimitError', err);
+    }
 
     sharePriceContract
-      .withdraw(unformattedBalance, { gasLimit })
+      .withdraw(unformattedBalance, params)
       .then(async (res) => {
-        AddTransaction(res.hash, `Withdraw ${withdraw} FTM`);
+        AddTransaction(res.hash, `Withdraw ${withdrawAmount} FTM`);
       })
       .catch(handleError)
       .finally(() => setWithdrawing(false));
@@ -111,8 +123,8 @@ export default function Spread({ data }) {
           <div className={s.formField}>
             <input
               className={s.input}
-              value={deposit}
-              onChange={(ev) => setDeposit(ev.target.value)}
+              value={depositAmount}
+              onChange={(ev) => setDepositAmount(ev.target.value)}
               type="number"
               placeholder="Amount"
               required
@@ -130,8 +142,8 @@ export default function Spread({ data }) {
           <div className={s.formField}>
             <input
               className={s.input}
-              value={withdraw}
-              onChange={(ev) => setWithdraw(ev.target.value)}
+              value={withdrawAmount}
+              onChange={(ev) => setWithdrawAmount(ev.target.value)}
               type="number"
               placeholder="Amount"
               required
