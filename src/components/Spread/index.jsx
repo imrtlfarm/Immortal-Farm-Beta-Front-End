@@ -7,6 +7,8 @@ import { useTransactions } from '../../store/transactions';
 import { usePopups } from '../../store/popups';
 import s from './Spread.module.scss';
 
+const GAS_LIMIT_ADD_PERCENT = 4;
+
 export default function Spread({ data }) {
   const [depositing, setDepositing] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
@@ -46,7 +48,7 @@ export default function Spread({ data }) {
 
     try {
       const estimatedGas = await signer.estimateGas(params);
-      params.gasLimit = estimatedGas.mul(110).div(100);
+      params.gasLimit = estimatedGas.mul(100 + GAS_LIMIT_ADD_PERCENT).div(100);
     } catch (err) {
       console.log('gasLimitError', err);
     }
@@ -73,7 +75,7 @@ export default function Spread({ data }) {
 
     try {
       const estimatedGas = await sharePriceContract.estimateGas.withdraw(parseUnits(withdrawAmount));
-      params.gasLimit = estimatedGas.mul(110).div(100);
+      params.gasLimit = estimatedGas.mul(100 + GAS_LIMIT_ADD_PERCENT).div(100);
     } catch (err) {
       console.log('gasLimitError', err);
     }
@@ -92,10 +94,10 @@ export default function Spread({ data }) {
     if (!sharePriceContract) return;
     setWithdrawing(true);
     const params = {};
-    
+
     try {
       const estimatedGas = await sharePriceContract.estimateGas.withdraw(unformattedBalance);
-      params.gasLimit = estimatedGas.mul(110).div(100);
+      params.gasLimit = estimatedGas.mul(100 + GAS_LIMIT_ADD_PERCENT).div(100);
     } catch (err) {
       console.log('gasLimitError', err);
     }
