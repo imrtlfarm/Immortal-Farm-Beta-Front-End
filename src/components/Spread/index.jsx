@@ -22,7 +22,7 @@ export default function Spread({ data }) {
   const { AddPopup } = usePopups();
 
   const handleError = (error) => {
-    let text = error?.data?.message;
+    let text = error.data?.message || error.message || 'Transaction failed';
     if (!text || text.includes('User denied transaction signature')) return;
     if (text.includes('Wait for cooldown after depositing before you can withdraw')) {
       text = text + '. Withdraw still on CD';
@@ -56,8 +56,8 @@ export default function Spread({ data }) {
     signer
       .sendTransaction(params)
       .then(async (res) => {
-        setDepositAmount(undefined);
-        AddTransaction(res.hash, `Deposited ${depositAmount} FTM`);
+        setDepositAmount('');
+        AddTransaction({ hash: res.hash, successText: `Deposited ${depositAmount} FTM`, errorText: 'Deposit failed' });
       })
       .catch(handleError)
       .finally(() => setDepositing(false));
@@ -83,8 +83,12 @@ export default function Spread({ data }) {
     sharePriceContract
       .withdraw(parseUnits(withdrawAmount), params)
       .then(async (res) => {
-        setWithdrawAmount(undefined);
-        AddTransaction(res.hash, `Withdraw ${withdrawAmount} FTM`);
+        setWithdrawAmount('');
+        AddTransaction({
+          hash: res.hash,
+          successText: `Withdrawn ${withdrawAmount} share tokens`,
+          errorText: 'Withdraw failed',
+        });
       })
       .catch(handleError)
       .finally(() => setWithdrawing(false));
@@ -105,7 +109,11 @@ export default function Spread({ data }) {
     sharePriceContract
       .withdraw(unformattedBalance, params)
       .then(async (res) => {
-        AddTransaction(res.hash, `Withdraw ${withdrawAmount} FTM`);
+        AddTransaction({
+          hash: res.hash,
+          successText: `Withdrawn ${balance} share tokens`,
+          errorText: 'Withdraw failed',
+        });
       })
       .catch(handleError)
       .finally(() => setWithdrawing(false));
@@ -155,7 +163,7 @@ export default function Spread({ data }) {
           <div className={s.buttons}>
             {approvalState === ApprovalState.APPROVED ? (
               <button className={s.button} disabled={withdrawing} type="submit">
-                Approve
+                Withdraw
               </button>
             ) : (
               <button
