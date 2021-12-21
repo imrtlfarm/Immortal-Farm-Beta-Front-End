@@ -60,14 +60,15 @@ export function TransactionsProvider({ children }) {
   }, [chainId, library, blockNumberCallback]);
   const lastBlockNumber = blockNumberState.blockNumber;
 
-  function AddTransaction(hash, summery, extras) {
+  function AddTransaction({ hash, successText, errorText, extras }) {
     const subscribe = extras?.subscribe,
       claim = extras?.claim,
       approval = extras?.approval;
     const transactions = getRecentTransactions();
     transactions[hash] = {
       hash,
-      summery,
+      successText,
+      errorText,
       subscribe,
       claim,
       approval,
@@ -120,6 +121,17 @@ export function TransactionsProvider({ children }) {
     },
     [getRecentTransactions, setState],
   );
+
+  const handleTransactionResult = async ({ isSuccess, hash }) => {
+    const successText = state[hash]?.successText || 'Transaction succeed';
+    const errorText = state[hash]?.errorText || 'Transaction failed';
+    if (isSuccess) {
+      AddPopup({ type: 'success', text: successText, link: hash });
+    } else {
+      AddPopup({ type: 'error', text: errorText, link: hash });
+    }
+  }
+
   useEffect(() => {
     if (!chainId || !library || !lastBlockNumber) return;
     Object.keys(state)
@@ -142,7 +154,7 @@ export function TransactionsProvider({ children }) {
                   transactionIndex: receipt.transactionIndex,
                 },
               });
-              AddPopup({ type: 'success', text: state[hash]?.summery, link: hash });
+              handleTransactionResult({ isSuccess: receipt.status, hash });
             } else {
               checkedTransaction({
                 chainId,

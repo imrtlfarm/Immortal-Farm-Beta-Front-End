@@ -89,9 +89,14 @@ export function useApproveCallback(token, amountToApprove, spender) {
         },
       )
       .then((response) => {
-        AddTransaction(response, {
-          summary: 'Approve ',
-          approval: { tokenAddress: token.address, spender: spender },
+        console.log('approve response', response)
+        AddTransaction({
+          hash: response.hash,
+          successText: 'Approve succeed',
+          errorText: 'Approve failed',
+          extras: {
+            approval: { tokenAddress: token.address, spender: spender },
+          }
         });
       })
       .catch((error) => {
